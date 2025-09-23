@@ -1,10 +1,10 @@
 name: Build PAM Wrongpass Module
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
+  push:
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 jobs:
   build:
@@ -23,17 +23,3 @@ jobs:
 
       - name: Build shared library
         run: go build -buildmode=c-shared -o pam_wrongpass.so pam_wrongpass.go
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pam_wrongpass.so
-          path: pam_wrongpass.so
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: pam_wrongpass.so
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
