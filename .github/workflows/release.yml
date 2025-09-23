@@ -23,11 +23,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - uses: actions/download-artifact@v4
+      - name: Download artifact from build workflow
+        uses: dawidd6/action-download-artifact@v6
         with:
-          pattern: pam_wrongpass_linux_${{ matrix.arch }}.so
-          merge-multiple: true
-          path: ./
+          workflow: Build PAM Wrongpass Module
+          workflow_conclusion: success
+          branch: main
+          name: pam_wrongpass_linux_${{ matrix.arch }}.so
+          path: .
+          check_artifacts: true
 
       - name: Upload to the release
         uses: svenstaro/upload-release-action@2.11.2

@@ -5,8 +5,8 @@ permissions: read-all
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    tags: ['v*.*.*']
+    branches: [main]
   pull_request:
     types: [opened, reopened, synchronize]
 
