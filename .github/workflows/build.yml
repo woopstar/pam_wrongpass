@@ -9,17 +9,28 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ['1.24.2']
+        arch: [amd64, arm64]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libpam0g-dev
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpam0g-dev
 
-      - name: Set up Go
+      - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.24.2'
+          go-version: ${{ matrix.go }}
 
-      - name: Build shared library
-        run: go build -buildmode=c-shared -o pam_wrongpass.so pam_wrongpass.go
+      - name: Build .so
+        env:
+          CGO_ENABLED: '1'
+          GOOS: linux
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          go build -buildmode=c-shared -o pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
+          file pam_wrongpass_linux_${{ matrix.arch }}.so

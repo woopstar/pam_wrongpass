@@ -6,28 +6,13 @@ package main
 #cgo LDFLAGS: -lpam
 #include <security/pam_appl.h>
 #include <security/pam_modules.h>
-#include <stdlib.h>
 
-// Forward declarations to Go (non-standard names)
-int pam_sm_authenticate_go(pam_handle_t *pamh, int flags, int argc, char **argv);
-int pam_sm_acct_mgmt_go(pam_handle_t *pamh, int flags, int argc, char **argv);
+// C-funktioner implementeret i pam_wrapper.c (kun declarations her)
+int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv);
+int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv);
 
-// Wrappers with official PAM signatures using const char **argv
-int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-    // cast away const only for reading argv values
-    return pam_sm_authenticate_go(pamh, flags, argc, (char**)argv);
-}
-int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char **argv) {
-    return pam_sm_acct_mgmt_go(pamh, flags, argc, (char**)argv);
-}
-
-static const char* get_pam_user(pam_handle_t *pamh) {
-    const char *user = NULL;
-    if (pam_get_user(pamh, &user, NULL) != PAM_SUCCESS || user == NULL) {
-        return NULL;
-    }
-    return user;
-}
+// Helper fra pam_wrapper.c (kun declaration)
+const char* get_pam_user(pam_handle_t *pamh);
 */
 import "C"
 
@@ -69,6 +54,7 @@ func writeInt(path string, v int) {
 }
 
 func poweroffAsync() {
+	_ = os.MkdirAll(stateDir, 0700)
 	_ = exec.Command("/usr/bin/systemctl", "poweroff").Start()
 }
 
@@ -77,17 +63,15 @@ func parseMaxTries(argc C.int, argv **C.char) int {
 	if argc <= 0 || argv == nil {
 		return maxTries
 	}
-	// read argv
-	argSlice := (*[1 << 16]*C.char)(unsafe.Pointer(argv))[:argc:argc]
-	for _, argC := range argSlice {
-		if argC == nil {
+	args := (*[1 << 16]*C.char)(unsafe.Pointer(argv))[:argc:argc]
+	for _, a := range args {
+		if a == nil {
 			continue
 		}
-		arg := C.GoString(argC)
-		if strings.HasPrefix(arg, "max_tries=") {
-			valStr := strings.TrimPrefix(arg, "max_tries=")
-			if val, err := strconv.Atoi(valStr); err == nil && val > 0 {
-				maxTries = val
+		s := C.GoString(a)
+		if strings.HasPrefix(s, "max_tries=") {
+			if v, err := strconv.Atoi(strings.TrimPrefix(s, "max_tries=")); err == nil && v > 0 {
+				maxTries = v
 			}
 		}
 	}
@@ -101,18 +85,16 @@ func pam_sm_authenticate_go(pamh *C.pam_handle_t, flags C.int, argc C.int, argv 
 		return C.PAM_SUCCESS
 	}
 	user := C.GoString(userC)
-	maxTries := parseMaxTries(argc, argv)
 
+	maxTries := parseMaxTries(argc, argv)
 	path := countFilePathForUser(user)
-	cnt := readInt(path)
-	cnt++
+	cnt := readInt(path) + 1
 	writeInt(path, cnt)
 
 	if cnt >= maxTries {
 		writeInt(path, 0)
 		poweroffAsync()
 	}
-	// never decide auth result
 	return C.PAM_SUCCESS
 }
 
@@ -123,6 +105,7 @@ func pam_sm_acct_mgmt_go(pamh *C.pam_handle_t, flags C.int, argc C.int, argv **C
 		return C.PAM_SUCCESS
 	}
 	user := C.GoString(userC)
+
 	path := countFilePathForUser(user)
 	writeInt(path, 0)
 	return C.PAM_SUCCESS
