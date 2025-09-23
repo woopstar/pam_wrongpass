@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+    labels:
+      - dependencies
+      - patch
+      - skip-changelog
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: daily
+      time: "04:00"
+    labels:
+      - dependencies
+      - patch
