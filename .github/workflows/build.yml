@@ -32,5 +32,11 @@ jobs:
           GOOS: linux
           GOARCH: ${{ matrix.arch }}
         run: |
-          go build -buildmode=c-shared -o pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
+          go build -buildmode=c-shared -o ./pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
           file pam_wrongpass_linux_${{ matrix.arch }}.so
+
+      - name: Upload ${{ matrix.arch }} artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pam_wrongpass_linux_${{ matrix.arch }}.so
+          path: pam_wrongpass_linux_${{ matrix.arch }}.so

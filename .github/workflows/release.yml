@@ -23,7 +23,7 @@ jobs:
         uses: svenstaro/upload-release-action@2.11.2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./pam_wrongpass_linux_amd64.so
+          file: ./dist/pam_wrongpass_linux_amd64.so
           asset_name: pam_wrongpass_linux_amd64.so
           tag: ${{ github.ref }}
           overwrite: true
