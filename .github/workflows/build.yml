@@ -1,6 +1,7 @@
 name: Build PAM Wrongpass Module
 
-permissions: read-all
+permissions:
+  contents: read
 
 on:
   workflow_dispatch:
@@ -11,9 +12,11 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-  build:
+  build-amd64:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: read
+      actions: write
     strategy:
       matrix:
         go: ['1.24.2']
@@ -37,8 +40,46 @@ jobs:
           GOOS: linux
           GOARCH: ${{ matrix.arch }}
         run: |
-          go build -buildmode=c-shared -o ./pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
+          go build -buildmode=c-shared -o pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
           file pam_wrongpass_linux_${{ matrix.arch }}.so
+
+      - name: Upload ${{ matrix.arch }} artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pam_wrongpass_linux_${{ matrix.arch }}.so
+          path: pam_wrongpass_linux_${{ matrix.arch }}.so
+
+  build-arm64:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    strategy:
+      matrix:
+        go: ['1.24.2']
+        arch: [arm64]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build on ${{ matrix.arch }} (QEMU)
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          install: |
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y \
+              build-essential libpam0g-dev curl ca-certificates
+            curl -fsSL https://go.dev/dl/go1.24.2.linux-${{ matrix.arch }}.tar.gz -o /tmp/go.tar.gz
+            tar -C /usr/local -xzf /tmp/go.tar.gz
+            echo 'export PATH=/usr/local/go/bin:$PATH' >> /etc/profile
+          run: |
+            . /etc/profile
+            go version
+            CGO_ENABLED=1 GOOS=linux GOARCH=${{ matrix.arch }} \
+              go build -buildmode=c-shared -o pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
+            file pam_wrongpass_linux_${{ matrix.arch }}.so
 
       - name: Upload ${{ matrix.arch }} artifact
         uses: actions/upload-artifact@v4
