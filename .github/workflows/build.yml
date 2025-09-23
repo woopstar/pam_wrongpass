@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         go: ['1.24.2']
-        arch: [amd64, arm64]
+        arch: [amd64]
     steps:
       - uses: actions/checkout@v5
 

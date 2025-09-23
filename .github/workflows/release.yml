@@ -19,39 +19,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - uses: actions/setup-go@v6
-        with:
-          go-version: '^1.24.2'
-
-      - name: Update version in main.go to ${{ github.event.release.tag_name }}
-        run: |
-          sed -i 's/var currentVersion = ".*"/var currentVersion = "${{ github.event.release.tag_name }}"/' ./main.go
-
-      - name: Commit main.go with updated version
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add ./main.go
-          git commit -m "Updated ./main.go"
-          git push origin HEAD:${{ github.event.release.target_commitish }}
-
-      - name: Install rsrc to embed icon into application
-        run: |
-          go install github.com/akavel/rsrc@latest
-
-      - name: Generate Windows resource file with icon
-        run: |
-          $HOME/go/bin/rsrc -ico assets/icon_active.ico -o resource_windows.syso
-
-      - name: Build AutoExitNode for windows amd64
-        run: |
-          GOOS=windows GOARCH=amd64 go build -ldflags="-H windowsgui" -o AutoExitNode.exe
-
       - name: Upload AutoExitNode.exe to the release
         uses: svenstaro/upload-release-action@2.11.2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./AutoExitNode.exe
-          asset_name: AutoExitNode.exe
+          file: ./pam_wrongpass_linux_amd64.so
+          asset_name: pam_wrongpass_linux_amd64.so
           tag: ${{ github.ref }}
           overwrite: true
