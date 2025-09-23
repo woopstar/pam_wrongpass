@@ -17,8 +17,7 @@ jobs:
     permissions: write-all
     strategy:
       matrix:
-        go: ['1.24.2']
-        arch: [amd64]
+        arch: [amd64,arm64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
