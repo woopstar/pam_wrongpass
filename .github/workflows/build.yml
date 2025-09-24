@@ -63,7 +63,7 @@ jobs:
           install: |
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y \
-              build-essential libpam0g-dev curl ca-certificates
+              build-essential libpam0g-dev curl ca-certificates file
             curl -fsSL https://go.dev/dl/go1.24.2.linux-arm64.tar.gz -o /tmp/go.tar.gz
             tar -C /usr/local -xzf /tmp/go.tar.gz
             echo 'export PATH=/usr/local/go/bin:$PATH' >> /etc/profile
