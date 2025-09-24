@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Kør arm64 userspace via QEMU
       - name: Build on aarch64 (QEMU)
