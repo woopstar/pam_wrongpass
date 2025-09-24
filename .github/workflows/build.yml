@@ -50,6 +50,10 @@ jobs:
   build-arm64:
     runs-on: ubuntu-latest
     permissions: write-all
+    strategy:
+      matrix:
+        go: ['1.24.2']
+        arch: [arm64]
     steps:
       - uses: actions/checkout@v5
 
@@ -64,19 +68,19 @@ jobs:
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y \
               build-essential libpam0g-dev curl ca-certificates file
-            curl -fsSL https://go.dev/dl/go1.24.2.linux-arm64.tar.gz -o /tmp/go.tar.gz
+            curl -fsSL https://go.dev/dl/go1.24.2.linux-${{ matrix.arch }}.tar.gz -o /tmp/go.tar.gz
             tar -C /usr/local -xzf /tmp/go.tar.gz
             echo 'export PATH=/usr/local/go/bin:$PATH' >> /etc/profile
           run: |
             . /etc/profile
             go version
             go env
-            CGO_ENABLED=1 GOOS=linux GOARCH=arm64 \
-              go build -buildmode=c-shared -o pam_wrongpass_linux_arm64.so pam_wrongpass.go
+            CGO_ENABLED=1 GOOS=linux GOARCH=${{ matrix.arch }} \
+              go build -buildmode=c-shared -o pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
             file pam_wrongpass_linux_arm64.so
 
-      - name: Upload arm64 artifact
+      - name: Upload ${{ matrix.arch }} artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pam_wrongpass_linux_arm64.so
-          path: pam_wrongpass_linux_arm64.so
+          name: pam_wrongpass_linux_${{ matrix.arch }}.so
+          path: pam_wrongpass_linux_${{ matrix.arch }}.so
