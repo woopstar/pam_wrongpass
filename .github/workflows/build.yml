@@ -19,6 +19,7 @@ jobs:
       matrix:
         go: ['1.24.2']
         arch: [amd64]
+        os: [darwin,linux,windows]
     steps:
       - uses: actions/checkout@v5
 
@@ -32,20 +33,17 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
 
-      - name: Build .so
-        env:
-          CGO_ENABLED: '1'
-          GOOS: linux
-          GOARCH: ${{ matrix.arch }}
+      - name: Build for ${{ matrix.os }}_${{ matrix.arch }}.so
         run: |
-          go build -buildmode=c-shared -o pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
-          file pam_wrongpass_linux_${{ matrix.arch }}.so
+          CGO_ENABLED=1 GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} \
+          go build -buildmode=c-shared -o pam_wrongpass_${{ matrix.os }}_${{ matrix.arch }}.so pam_wrongpass.go
+          file pam_wrongpass_${{ matrix.os }}_${{ matrix.arch }}.so
 
-      - name: Upload ${{ matrix.arch }} artifact
+      - name: Upload pam_wrongpass_${{ matrix.os }}_${{ matrix.arch }}.so artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pam_wrongpass_linux_${{ matrix.arch }}.so
-          path: pam_wrongpass_linux_${{ matrix.arch }}.so
+          name: pam_wrongpass_${{ matrix.os }}_${{ matrix.arch }}.so
+          path: pam_wrongpass_${{ matrix.os }}_${{ matrix.arch }}.so
 
   build-arm64:
     runs-on: ubuntu-latest
@@ -54,6 +52,7 @@ jobs:
       matrix:
         go: ['1.24.2']
         arch: [arm64]
+        os: [darwin,linux,windows]
     steps:
       - uses: actions/checkout@v5
 
@@ -75,12 +74,12 @@ jobs:
             . /etc/profile
             go version
             go env
-            CGO_ENABLED=1 GOOS=linux GOARCH=${{ matrix.arch }} \
-              go build -buildmode=c-shared -o pam_wrongpass_linux_${{ matrix.arch }}.so pam_wrongpass.go
-            file pam_wrongpass_linux_arm64.so
+            CGO_ENABLED=1 GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} \
+              go build -buildmode=c-shared -o pam_wrongpass_${{ matrix.os }}_${{ matrix.arch }}.so pam_wrongpass.go
+            file pam_wrongpass_${{ matrix.os }}_arm64.so
 
       - name: Upload ${{ matrix.arch }} artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pam_wrongpass_linux_${{ matrix.arch }}.so
-          path: pam_wrongpass_linux_${{ matrix.arch }}.so
+          name: pam_wrongpass_${{ matrix.os }}_${{ matrix.arch }}.so
+          path: pam_wrongpass_${{ matrix.os }}_${{ matrix.arch }}.so
