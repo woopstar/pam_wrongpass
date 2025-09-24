@@ -19,7 +19,7 @@ jobs:
       matrix:
         go: ['1.24.2']
         arch: [amd64]
-        os: [darwin,linux,windows]
+        os: [linux]
     steps:
       - uses: actions/checkout@v5
 
@@ -52,7 +52,7 @@ jobs:
       matrix:
         go: ['1.24.2']
         arch: [arm64]
-        os: [darwin,linux,windows]
+        os: [linux]
     steps:
       - uses: actions/checkout@v5
 

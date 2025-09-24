@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64,arm64]
-        os: [darwin,linux,windows]
+        os: [linux]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
