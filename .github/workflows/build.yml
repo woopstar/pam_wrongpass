@@ -55,7 +55,7 @@ jobs:
 
       # Kør arm64 userspace via QEMU
       - name: Build on aarch64 (QEMU)
-        uses: uraimo/run-on-arch-action@v2
+        uses: uraimo/run-on-arch-action@v3
         with:
           arch: aarch64
           distro: ubuntu22.04
