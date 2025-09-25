@@ -108,29 +108,6 @@ sudo install -m 0644 pam_wrongpass.so /usr/lib/security/pam_wrongpass.so
 
 ---
 
-## GitHub Actions CI/CD
-
-This repository includes GitHub Actions workflows to build the module for multiple architectures:
-
-* **amd64** – built natively
-* **arm64** – built using QEMU and [`uraimo/run-on-arch-action`](https://github.com/uraimo/run-on-arch-action)
-
-When you push a **tag** (e.g., `v1.0.0`):
-
-1. GitHub Actions automatically builds `.so` files for all supported architectures.
-2. The build artifacts are uploaded to the GitHub Release.
-
-### Example
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-The release files will then appear under [Releases](../../releases).
-
----
-
 ## Configuration
 
 | Parameter   | Description                                     | Default |
