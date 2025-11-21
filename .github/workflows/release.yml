@@ -21,7 +21,7 @@ jobs:
         os: [linux]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download artifact from build workflow
         uses: dawidd6/action-download-artifact@v11
