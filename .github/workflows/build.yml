@@ -21,7 +21,7 @@ jobs:
         arch: [amd64]
         os: [linux]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Install deps
         run: |
@@ -54,7 +54,7 @@ jobs:
         arch: [arm64]
         os: [linux]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # Kør arm64 userspace via QEMU
       - name: Build on aarch64 (QEMU)
